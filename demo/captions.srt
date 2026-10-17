@@ -1,0 +1,95 @@
+1
+00:00:00,850 --> 00:00:03,276
+Sim's memory windowing has unit tests.
+
+2
+00:00:03,276 --> 00:00:09,086
+But if a change broke how the final request is put together, those tests would not show it.
+
+3
+00:00:09,086 --> 00:00:11,129
+This harness makes that visible.
+
+4
+00:00:11,629 --> 00:00:18,162
+It replays one hundred twenty made-up conversations through Sim's real windowing code, unchanged.
+
+5
+00:00:18,162 --> 00:00:20,249
+Plain code checks each request.
+
+6
+00:00:20,249 --> 00:00:21,259
+No model judge.
+
+7
+00:00:21,759 --> 00:00:22,700
+Four settings.
+
+8
+00:00:22,700 --> 00:00:25,791
+With no memory, every fact is lost, by design.
+
+9
+00:00:25,791 --> 00:00:30,898
+Full context keeps seventy nine percent on dev and eighty seven on held out.
+
+10
+00:00:30,898 --> 00:00:34,526
+The ten message window keeps fifty four and sixty two.
+
+11
+00:00:34,526 --> 00:00:37,549
+The token window, fifty eight and sixty five.
+
+12
+00:00:38,049 --> 00:00:39,186
+Here is one case.
+
+13
+00:00:39,186 --> 00:00:42,530
+An order ID is given, then eleven messages follow.
+
+14
+00:00:42,530 --> 00:00:45,741
+Full context and the token window still hold it.
+
+15
+00:00:45,741 --> 00:00:48,549
+The ten message window has already cut it.
+
+16
+00:00:49,049 --> 00:00:51,431
+Bulky tool results change the picture.
+
+17
+00:00:51,431 --> 00:01:00,329
+Only three messages follow the fact here, yet the four thousand token window lost it, because one tool result is bigger than the whole window.
+
+18
+00:01:00,829 --> 00:01:04,755
+To trust the checker, I broke request assembly seven ways.
+
+19
+00:01:04,755 --> 00:01:05,703
+It caught six.
+
+20
+00:01:05,703 --> 00:01:10,170
+The one it missed is a real gap in my cases, and the page says so.
+
+21
+00:01:10,670 --> 00:01:16,335
+What is faked: token counts, model limits, and there is no live model or summary mode.
+
+22
+00:01:16,335 --> 00:01:19,630
+Facts kept means the exact text is in the request.
+
+23
+00:01:20,129 --> 00:01:23,789
+The next step would be running the same check on real traces.
+
+24
+00:01:23,789 --> 00:01:26,789
+This is a harness, not a claim that Sim has a bug.
