@@ -1,0 +1,4 @@
+f38f880bfcd5f203c1423bbf31476227995d8288d230438d3f67e4a76227ece4  vendor/sim/constants.ts
+6ee4fe4058930feb83b24c856d0edc82fd3154cf1c5acce5f9b26cc9513876f0  vendor/sim/context-policy.ts
+3617a7e2eb0ad4addf2fc9f4ad4614839439b86c8ba2a5c5a0d7bbb8a8410401  vendor/sim/context-tokens.ts
+14fb29bfae5569930dac3b1e334df2e3a11cb0c65e145097f7ad803c1cece0eb  vendor/sim/history-window.ts

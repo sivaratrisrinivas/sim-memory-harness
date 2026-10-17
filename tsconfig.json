@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022", "module": "ESNext", "moduleResolution": "Bundler",
+    "strict": true, "skipLibCheck": true, "noEmit": true, "allowImportingTsExtensions": true, "resolveJsonModule": true,
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@/lib/memory/context-tokens": ["vendor/sim/context-tokens.ts"],
+      "@/lib/memory/constants": ["vendor/sim/constants.ts"],
+      "@/lib/memory/*": ["vendor/sim/*"],
+      "@/providers/types": ["src/shims/types.ts"],
+      "@/providers/conversation-model": ["src/shims/conversation-model.ts"],
+      "@/lib/tokenization/accurate": ["src/shims/accurate.ts"]
+    }
+  },
+  "include": ["src", "tests", "vendor"]
+}

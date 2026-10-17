@@ -1,0 +1,15 @@
+{
+  "name": "sim-memory-harness",
+  "private": true,
+  "type": "module",
+  "description": "Replay/eval harness for Sim's real memory windowing and message assembly code",
+  "scripts": {
+    "typecheck": "tsc -p .",
+    "verify-vendor": "sha256sum -c vendor/SHA256SUMS",
+    "generate": "tsx src/generate.ts",
+    "run": "tsx src/run.ts",
+    "test": "tsx --test tests/*.test.ts",
+    "check": "npm run verify-vendor && npm run typecheck && npm test && npm run generate && npm run run && git diff --exit-code -- data results"
+  },
+  "devDependencies": { "@types/node": "^20.14.0", "tsx": "^4.19.0", "typescript": "^5.6.0" }
+}

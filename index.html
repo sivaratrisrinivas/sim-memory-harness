@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sim memory replay harness</title>
+<meta name="description" content="Replays 120 synthetic conversations through Sim's real memory windowing code and checks the request that would go to the provider.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="wrap">
+  <p class="eyebrow">Replay and eval harness · independent project, not affiliated with Sim</p>
+  <h1>What does Sim's memory setting still send to the model?</h1>
+  <p class="lede">Sim's windowing code has unit tests. A slip in how the final request is put together would not show up in them. This harness replays 120 made-up conversations through Sim's <strong>real</strong> windowing and budget code, then checks the assembled request with plain code: are the facts still there, is the order right, is the system prompt kept, is the request about the right conversation.</p>
+  <p class="note">Nothing here claims a bug in Sim. Dropping old messages is how these settings are designed to work. The point is to make it visible, and to catch a change that breaks it by accident.</p>
+</header>
+
+<main class="wrap">
+<section class="faked" aria-labelledby="faked-h">
+  <h2 id="faked-h">What is real and what is faked</h2>
+  <div class="two">
+    <div><h3>Real</h3>
+      <ul>
+        <li>Sim's <code>history-window.ts</code>, <code>context-policy.ts</code>, <code>context-tokens.ts</code>, <code>constants.ts</code>, copied unchanged from commit <code>8df65ad</code> (Apache-2.0).</li>
+        <li>Defaults: 10 messages, 4,000 tokens, 16,000 token history budget, 90% context use.</li>
+        <li>The checker is plain code. There is no LLM judge anywhere.</li>
+      </ul></div>
+    <div><h3 class="fk">Faked</h3>
+      <ul>
+        <li><b>Token counts:</b> characters divided by 4. Sim uses a model tokenizer (and counts long text by bytes, which is real here).</li>
+        <li><b>Model limits:</b> a fixed 32,000 token window, plus made-up reserves (600 fixed, 4,096 output).</li>
+        <li><b>No live model.</b> "Facts kept" means the exact text is in the request, not that an agent answered right.</li>
+        <li><b>Summary mode is not built.</b> Sim's optional auto-summary needs an LLM call.</li>
+        <li><b>Store and groups:</b> an in-memory stand-in, not Sim's database.</li>
+        <li><b>Conversations are synthetic.</b> Bulk sizes (tool results 1.2k to 20k chars, pastes 3k to 9k chars) are my choice and drive the shape numbers.</li>
+      </ul></div>
+  </div>
+</section>
+
+<section aria-labelledby="res-h">
+  <h2 id="res-h">Results by setting</h2>
+  <p class="sub">120 cases: 72 dev, 48 held out. The split was frozen before any scoring. Counts shown, not just percentages. No setting was tuned on dev.</p>
+  <div class="tablewrap"><table id="results"><thead></thead><tbody></tbody></table></div>
+  <div class="grid3">
+    <div><h3>Facts kept by load shape</h3><div class="tablewrap"><table id="byshape"></table></div></div>
+    <div><h3>Facts kept by fact distance</h3><div class="tablewrap"><table id="bypos"></table></div></div>
+    <div><h3>Facts kept by fact type</h3><div class="tablewrap"><table id="bytype"></table></div></div>
+  </div>
+  <p class="sub small">Fact distance is how many messages came after the fact. Distance 9 is the last one a 10-message window holds, 11 the first it loses. All cells are facts-kept over all 120 cases (dev and held out together).</p>
+</section>
+
+<section aria-labelledby="tl-h">
+  <h2 id="tl-h">Timeline: what each setting still holds</h2>
+  <div class="controls">
+    <label>Case <select id="casepick"></select></label>
+    <label>Show <select id="splitpick"><option value="all">all 120</option><option value="dev">dev (72)</option><option value="held_out">held out (48)</option></select></label>
+    <label>Fact type <select id="typepick"><option value="all">any</option></select></label>
+    <label>Load shape <select id="shapepick"><option value="all">any</option></select></label>
+  </div>
+  <div id="caseinfo" class="caseinfo"></div>
+  <div class="legend" aria-hidden="true">
+    <span><i class="sw user"></i>user</span><span><i class="sw assistant"></i>assistant</span><span><i class="sw tool"></i>tool call and result</span>
+    <span><i class="sw fact"></i>message with the fact</span><span><i class="sw dropw"></i>cut by the setting's window</span><span><i class="sw dropb"></i>cut by the 16k request budget</span>
+  </div>
+  <div id="strips"></div>
+  <p class="sub small">Each box is one stored message, oldest on the left. Box width grows with its (faked) token count. The probe question comes last, right after the final box. Hover a box for its text.</p>
+</section>
+
+<section aria-labelledby="chk-h">
+  <h2 id="chk-h">Does the checker notice a broken request?</h2>
+  <p class="sub">I injected seven plausible assembly regressions and re-ran the dev cases. A regression counts as caught when a run that passed on the real code now fails a check.</p>
+  <div class="tablewrap"><table id="mutants"><thead><tr><th>Injected regression</th><th>Caught</th><th>Runs that newly fail</th><th>Checks that fired</th></tr></thead><tbody></tbody></table></div>
+  <p class="sub small" id="audit"></p>
+</section>
+
+<section aria-labelledby="tax-h">
+  <h2 id="tax-h">Why facts were lost (dev failures, grouped by cause)</h2>
+  <div class="tablewrap"><table id="taxonomy"></table></div>
+  <p class="sub small">Causes are assigned by code from where the fact message was cut (stage 1 setting window, or stage 2 request budget). "None" loses everything by design.</p>
+</section>
+
+<section class="limits" aria-labelledby="lim-h">
+  <h2 id="lim-h">Limits</h2>
+  <ul>
+    <li>Exact text in the request is a proxy for the agent answering correctly.</li>
+    <li>Adapters in Sim also budget schemas, files and output; real windows are tighter than this model.</li>
+    <li>The "isolation" check passes here because the stand-in store looks conversations up by exact id. It is there so a real store adapter or a bad change would be caught. See the injected prefix-leak row.</li>
+    <li>120 cases is small. Held-out is 48, so differences of a few points are noise.</li>
+  </ul>
+  <p>Source and method: <code>sim-memory-harness/README.md</code> in the repo. Sim code © the Sim authors, Apache-2.0, <a href="https://github.com/simstudioai/sim/tree/8df65ad39a10a6c34c61ff0674e0e8a7ad2164f0/apps/sim/lib/memory">commit 8df65ad</a>.</p>
+</section>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
