@@ -10,5 +10,5 @@ FAKED: token counter (chars/4), model limits (32k), no live LLM, no summary mode
 | Window: last 10 messages | 39/72 (54.2%) | 30/48 (62.5%) | 72/72 (100%) | 48/48 (100%) | 3610 / 3688 |
 | Window: 4,000 tokens | 42/72 (58.3%) | 31/48 (64.6%) | 72/72 (100%) | 48/48 (100%) | 302 / 314 |
 
-Mutation check (dev): 6/7 injected regressions caught.
+Mutation check (dev): 7/7 injected regressions caught.
 Naive-checker agreement: 480/480.

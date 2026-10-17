@@ -1,7 +1,7 @@
 // Replays every case through the real windowing code under four settings, checks the assembled request,
 // runs the mutation check of the checker, and writes results/results.json + results/RESULTS.md.
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
-import { generateAll, split, splitHash } from './generate.ts'
+import { generateAll, generateProbes, split, splitHash } from './generate.ts'
 import { assemble, SETTINGS, msgTokens, type Mutant } from './assemble.ts'
 import { runChecks, requestValid, naiveFactsKept, type Checks } from './checks.ts'
 import type { Case, SettingId } from './types.ts'
@@ -28,9 +28,9 @@ function cause(c: Case, setting: SettingId, a: ReturnType<typeof assemble>, ch: 
   return bulk ? 'token_window_bulk_displacement' : 'token_window_long_history'
 }
 
-function evaluate(mutant?: Mutant) {
+function evaluate(mutant?: Mutant, set: Case[] = cases) {
   const rows: Row[] = []
-  for (const c of cases) for (const s of SETTINGS) {
+  for (const c of set) for (const s of SETTINGS) {
     const a = assemble(c, s.id, mutant)
     const ch = runChecks(c, a.request)
     rows.push({
@@ -71,7 +71,7 @@ const causesHeld: Record<string, Record<string, number>> = {}
 for (const r of base.filter((r) => r.cause && r.split === 'held_out')) { causesHeld[r.cause!] ??= {}; causesHeld[r.cause!][r.setting] = (causesHeld[r.cause!][r.setting] ?? 0) + 1 }
 
 // checker validation 1: mutation check. Each mutant is a plausible regression in assembly. A mutant is "caught"
-// if some (case, setting) that passed on the real code now fails. Measured on dev cases only.
+// if some (case, setting) that passed on the real code now fails. Measured on the 72 dev cases plus 6 extra regression probes (p01 to p06, outside the 120).
 const MUTANTS: { id: Mutant; what: string }[] = [
   { id: 'reverse_history', what: 'history is sent newest first' },
   { id: 'drop_system', what: 'system prompt is lost from the request' },
@@ -81,9 +81,10 @@ const MUTANTS: { id: Mutant; what: string }[] = [
   { id: 'oldest_first_window', what: 'window keeps the OLDEST messages, not the newest' },
   { id: 'neighbor_prefix_leak', what: 'store finds conversations by id prefix (customer-123 also returns customer-1230)' },
 ]
-const baseKey = new Map(base.map((r) => [`${r.case_id}|${r.setting}`, r]))
+const probes = generateProbes()
+const baseKey = new Map([...base, ...evaluate(undefined, probes)].map((r) => [`${r.case_id}|${r.setting}`, r]))
 const mutants = MUTANTS.map((m) => {
-  const rows = evaluate(m.id).filter((r) => r.split === 'dev')
+  const rows = evaluate(m.id, [...cases.filter((c) => c.split === 'dev'), ...probes])
   const tripped: Record<string, number> = {}
   let regress = 0
   for (const r of rows) {

@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { runChecks, requestValid } from '../src/checks.ts'
 import { assemble } from '../src/assemble.ts'
-import { generateAll, split, splitHash } from '../src/generate.ts'
+import { generateAll, generateProbes, split, splitHash } from '../src/generate.ts'
 import { readFileSync } from 'node:fs'
 import type { Case } from '../src/types.ts'
 
@@ -81,4 +81,15 @@ test('dataset: 120 cases, 72/48, split frozen, strata balanced, no sentinel leak
 })
 test('the four vendored files are listed in SHA256SUMS (see npm run verify-vendor)', () => {
   assert.equal(readFileSync('vendor/SHA256SUMS', 'utf8').trim().split('\n').length, 4)
+})
+
+test('probes (outside the 120): real code is valid; a window that ignores tool groups produces an orphan the checker flags', () => {
+  const probes = generateProbes()
+  assert.equal(probes.length, 6)
+  let flagged = 0
+  for (const p of probes) for (const s of ['full_context', 'window_messages', 'window_tokens'] as const) {
+    assert.ok(requestValid(runChecks(p, assemble(p, s).request)), `${p.id} ${s} real code`)
+    if (!runChecks(p, assemble(p, s, 'no_groups').request).tool_pairs.pass) flagged++
+  }
+  assert.ok(flagged > 0)
 })

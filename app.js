@@ -67,7 +67,7 @@
   // mutants
   $('mutants').querySelector('tbody').innerHTML = R.mutants.map((m) => `<tr><td>${esc(m.what)}</td><td><b>${m.caught ? 'yes' : 'NO'}</b></td><td class="num">${m.regressed_dev_runs} of ${m.of}</td><td>${Object.entries(m.checks_tripped).map(([k, v]) => `${k} (${v})`).join(', ') || 'none'}</td></tr>`).join('')
   const miss = R.mutants.filter((m) => !m.caught).map((m) => m.what)
-  $('audit').innerHTML = `Caught ${R.mutants.filter((m) => m.caught).length} of ${R.mutants.length}. ${miss.length ? 'Missed: “' + esc(miss.join('; ')) + '”. In these cases the 16,000 token request budget evicts the orphaned tool message before the request is built, so the request looks fine. A real gap in case coverage, kept visible on purpose.' : ''} A second, naive implementation of the facts check (substring over the raw JSON) agrees with the main checker on ${R.checker_audit.naive_agreement.agree} of ${R.checker_audit.naive_agreement.total} runs.`
+  $('audit').innerHTML = `Caught ${R.mutants.filter((m) => m.caught).length} of ${R.mutants.length}. ${miss.length ? 'Missed: “' + esc(miss.join('; ')) + '”. ' : ''} A second, naive implementation of the facts check (substring over the raw JSON) agrees with the main checker on ${R.checker_audit.naive_agreement.agree} of ${R.checker_audit.naive_agreement.total} runs.`
 
   // taxonomy
   const causes = Object.keys(R.causes_dev)

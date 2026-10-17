@@ -633,11 +633,11 @@
    "id": "reverse_history",
    "what": "history is sent newest first",
    "caught": true,
-   "regressed_dev_runs": 177,
-   "of": 288,
+   "regressed_dev_runs": 195,
+   "of": 312,
    "checks_tripped": {
-    "history_order": 177,
-    "tool_pairs": 23,
+    "history_order": 195,
+    "tool_pairs": 38,
     "facts_kept": 14,
     "correction_order": 14
    }
@@ -646,50 +646,53 @@
    "id": "drop_system",
    "what": "system prompt is lost from the request",
    "caught": true,
-   "regressed_dev_runs": 288,
-   "of": 288,
+   "regressed_dev_runs": 312,
+   "of": 312,
    "checks_tripped": {
-    "system_kept": 288
+    "system_kept": 312
    }
   },
   {
    "id": "drop_probe",
    "what": "the current user message is lost",
    "caught": true,
-   "regressed_dev_runs": 288,
-   "of": 288,
+   "regressed_dev_runs": 312,
+   "of": 312,
    "checks_tripped": {
-    "probe_last": 288
+    "probe_last": 312
    }
   },
   {
    "id": "off_by_one_window",
    "what": "message window keeps 9 instead of 10",
    "caught": true,
-   "regressed_dev_runs": 8,
-   "of": 288,
+   "regressed_dev_runs": 9,
+   "of": 312,
    "checks_tripped": {
-    "facts_kept": 8,
+    "facts_kept": 9,
     "correction_order": 1
    }
   },
   {
    "id": "no_groups",
    "what": "tool exchanges are not kept together when windowing",
-   "caught": false,
-   "regressed_dev_runs": 0,
-   "of": 288,
-   "checks_tripped": {}
+   "caught": true,
+   "regressed_dev_runs": 4,
+   "of": 312,
+   "checks_tripped": {
+    "tool_pairs": 4,
+    "facts_kept": 2
+   }
   },
   {
    "id": "oldest_first_window",
    "what": "window keeps the OLDEST messages, not the newest",
    "caught": true,
-   "regressed_dev_runs": 93,
-   "of": 288,
+   "regressed_dev_runs": 96,
+   "of": 312,
    "checks_tripped": {
-    "history_order": 93,
-    "tool_pairs": 3,
+    "history_order": 96,
+    "tool_pairs": 4,
     "facts_kept": 2,
     "correction_order": 2
    }
@@ -699,7 +702,7 @@
    "what": "store finds conversations by id prefix (customer-123 also returns customer-1230)",
    "caught": true,
    "regressed_dev_runs": 42,
-   "of": 288,
+   "of": 312,
    "checks_tripped": {
     "history_order": 42,
     "isolation": 42,

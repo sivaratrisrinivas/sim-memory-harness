@@ -150,7 +150,7 @@ function makeFact(r: Rng, type: FactType, caseNo: number): { facts: Fact[]; stal
   }
 }
 
-function build(caseNo: number, type: FactType, shape: LoadShape, pos: Position): Omit<Case, 'split'> {
+function build(caseNo: number, type: FactType, shape: LoadShape, pos: Position, toolChars?: [number, number]): Omit<Case, 'split'> {
   const r = mulberry32(SEED + caseNo * 7919)
   const d = POSITIONS[pos]
   const conversationId = `customer-${int(r, 100, 899)}`
@@ -185,7 +185,7 @@ function build(caseNo: number, type: FactType, shape: LoadShape, pos: Position):
         const id = `call_${caseNo}_${tcount++}`
         const name = pick(r, TOOL_NAMES)
         hist.push({ role: 'assistant', content: null, kind: 'tool_call', tool_calls: [{ id, type: 'function', function: { name, arguments: JSON.stringify({ q: `lookup ${int(r, 1, 99)}` }) } }] })
-        hist.push({ role: 'tool', content: filler(r, int(r, 1200, 20000), `r${tcount}`), tool_call_id: id, name, kind: 'tool_result' })
+        hist.push({ role: 'tool', content: filler(r, toolChars ? int(r, toolChars[0], toolChars[1]) : int(r, 1200, 20000), `r${tcount}`), tool_call_id: id, name, kind: 'tool_result' })
       }
       A(shape === 'chitchat' ? pick(r, CHITCHAT_ASSIST) : pick(r, FILL_ASSIST))
     } else {
@@ -218,6 +218,13 @@ export function generateAll(): Omit<Case, 'split'>[] {
   let n = 1
   for (const t of FACT_TYPES) for (const s of LOAD_SHAPES) for (const p of Object.keys(POSITIONS) as Position[]) out.push(build(n++, t, s, p))
   return out
+}
+
+/** Regression probes: NOT part of the 120. Tool-heavy chats with small tool results (300 to 600 chars), so the
+ *  request budget does not hide a window that splits a tool exchange. Used only by the mutation check. */
+export function generateProbes(): Case[] {
+  const ps: Position[] = ['next', 'recent', 'inside', 'edge_in', 'edge_out', 'far']
+  return ps.map((p, i) => ({ ...build(201 + i, 'id_number', 'tool_heavy', p, [300, 600]), id: `p${String(i + 1).padStart(2, '0')}`, split: 'dev' as const }))
 }
 
 /** Stratified frozen split: strata = fact_type x load_shape (20), 6 cases each; 12 strata give 4 to dev, 8 give 3 => 72 / 48. */

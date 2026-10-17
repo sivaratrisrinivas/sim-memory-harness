@@ -35,6 +35,18 @@ Followed the original [evals-skills](https://github.com/ai-evals-course/evals-sk
 5. **Error discovery**: not the interactive review loop (no human reviewer here). I grouped the 72 dev failures by cause with code that records where each fact was cut (stage 1 window or stage 2 budget) and read through cases in the timeline view. Held-out failures are counted against the same causes, not used to make new ones.
 6. **Checker validation**: unit tests of known passes, known failures and borderline cases (`tests/checks.test.ts`); a mutation check (seven injected assembly regressions, dev cases); agreement with a second, naive implementation of the facts check on all 480 runs. This is not agreement with human labels; I did not hand label.
 
+## Workflow check against evals-skills
+
+| Skill step | What was done | Gap left |
+|---|---|---|
+| `evals-start` (routing) | No traces exist, so: `generate-synthetic-data`, then `error-discovery`; the failure modes are rule based, so `write-code-eval`. `validate-evaluator` is for LLM judges; for code checkers it points to unit tests. | none |
+| `generate-synthetic-data` | Three starting dimensions (fact type, load shape, fact distance), tuples crossed to 120, templates written by hand with a seeded generator (two steps: tuples, then text), realism filter by tests (every fact planted, no neighbor id leaks into the target). | The skill wants a human to review 20 draft tuples. Nobody has. Read `data/cases.json`. |
+| `error-discovery` | Failures grouped by cause with code, then read in the timeline view; taxonomy on the page, counted again on held out. | The skill is an interactive human review. This was not; there are no open-coded human notes. |
+| `write-code-eval` | One check per failure rule, each returns pass and reason; known pass, known fail and borderline unit tests. | none |
+| `validate-evaluator` (adapted for code) | Unit tests; mutation check (7/7 caught, after adding probes); a second naive implementation agrees on 480 of 480 runs; a 30 run spot audit (below). | No domain-expert labels, no TPR/TNR against humans. |
+
+Spot audit: I read 30 seeded random (case, setting) runs (17 of them "none", which are trivial) and compared the raw request to the verdict. 30 of 30 agree. This is me, not a domain expert.
+
 ## Results
 
 Facts kept = the planted fact is in the request. Counts, not only percentages. Full tables and per-case timelines: `results/results.json`, `results/RESULTS.md`, and the live page.
@@ -57,7 +69,7 @@ What the numbers say (about this synthetic set, not about Sim users):
 
 ### Does the checker see a broken request?
 
-Seven injected regressions, dev cases (288 runs each): reversed history, dropped system prompt, dropped current message, window off by one, windows that ignore tool-exchange groups, a window that keeps the oldest messages, and a store that finds conversations by id prefix. **Six of seven are caught.** The one missed ("windows ignore tool groups") is a real coverage gap: in these cases the 16,000 token budget evicts the orphaned tool message before the request is built, so nothing wrong reaches the request. The `tool_pairs` check itself is covered by a unit test. Cases with small tool results at the window edge would be the next ones to add.
+Seven injected regressions, 72 dev cases plus 6 probe cases (312 runs each): reversed history, dropped system prompt, dropped current message, window off by one, windows that ignore tool-exchange groups, a window that keeps the oldest messages, and a store that finds conversations by id prefix. **All seven are caught.** The last one, "windows ignore tool-exchange groups", was missed at first: in the 120 cases the 16,000 token budget evicts the orphaned tool message before the request is built, so nothing wrong reached the request. I added six regression probes (`p01` to `p06`, tool-heavy chats with 300 to 600 character tool results, outside the 120 and outside the frozen split) and the `tool_pairs` check now fires on 4 of 312 runs. The 120-case numbers did not change.
 
 ## Gaps and cautions
 
