@@ -6,7 +6,7 @@ Independent project. Not affiliated with Sim. It does not claim a bug in Sim: dr
 
 **Why.** Sim's windowing has unit tests, but a slip in how the final request is assembled (order, system prompt, a split tool exchange, the wrong conversation) would not show up in them. This harness replays conversations and asserts on the assembled request.
 
-Live page: see the repo's link, `sim-memory-harness/` (static, no build step). Run the checks yourself in under a minute:
+Live page: https://sivaratrisrinivas.github.io/sim-memory-harness/ (static, no build step, demo video on the page). Run the checks yourself in under a minute:
 
 ```
 npm ci
@@ -78,13 +78,14 @@ src/checks.ts       the code checker
 src/run.ts          runs everything, writes results/
 tests/              checker and dataset tests
 index.html app.js style.css   the static page (reads results/results.json)
+media/              demo video and captions
 demo/               voiceover script and captions
 ```
 
 ## Licence and credit
 
-Files in `vendor/sim/` are Sim's, © the Sim authors, Apache-2.0 (`LICENSE-sim-Apache-2.0`), copied unchanged from commit `8df65ad`. The rest of this folder is under the repository's own terms.
+Files in `vendor/sim/` are Sim's, © the Sim authors, Apache-2.0 (`LICENSE-sim-Apache-2.0`), copied unchanged from commit `8df65ad`. The rest of this repository is MIT licensed (`LICENSE`).
 
 ## CI
 
-`ci/sim-memory-harness.workflow.yml` is a GitHub Actions workflow that runs `npm run check` for this folder. It sits here, inactive, because the token used to open the first PR had no `workflow` scope. Copy it to `.github/workflows/` to turn it on.
+`ci/check.workflow.yml` is a GitHub Actions workflow that runs `npm run check`. It is kept here, inactive, until it is copied to `.github/workflows/check.yml` (the token used to publish this repo has no `workflow` scope).
