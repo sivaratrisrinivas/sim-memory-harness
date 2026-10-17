@@ -100,4 +100,4 @@ Files in `vendor/sim/` are Sim's, © the Sim authors, Apache-2.0 (`LICENSE-sim-A
 
 ## CI
 
-`ci/check.workflow.yml` is a GitHub Actions workflow that runs `npm run check`. It is kept here, inactive, until it is copied to `.github/workflows/check.yml` (the token used to publish this repo has no `workflow` scope).
+`.github/workflows/check.yml` runs `npm run check` on every push and pull request. It was added through the GitHub connector because the local token has no `workflow` scope.
